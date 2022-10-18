@@ -250,6 +250,27 @@ int main() {
     Model sign2("resources/objects/speed-limit-sign/10566_Speed Limit Sign (70 MPH)_v2-L3.obj");
     sign2.SetShaderTextureNamePrefix("material.");
 
+    vector<glm::vec3> streetPositions {
+            glm::vec3(16.0f,5.0f,10.0f),
+            glm::vec3(16.0f,6.75f,8.25f),
+            glm::vec3(16.0f,8.5f,6.5f),
+            glm::vec3(16.0f,10.25f,4.75f),
+            glm::vec3(16.0f,12.0f,3.0f),
+            glm::vec3(16.0f,13.75f,1.25f),
+            glm::vec3(16.0f,15.5f,-0.5f),
+            glm::vec3(16.0f,17.25f,-2.25f),
+            glm::vec3(16.0f,19.0f,-4.0f)
+
+    };
+
+    vector<glm::vec3> stopSignPositions {
+            glm::vec3(13.95f,7.0f,12.0f)
+    };
+
+    vector<glm::vec3> speedSignPositions {
+            glm::vec3(17.85f,7.5f,12.0f)
+    };
+
     // Skybox vertices
     //____________________________________________________________________________________________
     float skyboxVertices[] = {
@@ -350,30 +371,43 @@ int main() {
         ourShader.setMat4("view", view);
 
         ourShader.use();
-        glm::mat4 model1 = glm::mat4(1.0f);
-        model1 = glm::translate(model1, glm::vec3(0.0f, -3.0f, 0.0f));
-        model1 = glm::scale(model1, glm::vec3(0.008f));
-        model1 = glm::rotate(model1, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        model1 = glm::rotate(model1, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        ourShader.setMat4("model", model1);
-        street.Draw(ourShader);
+        glm::mat4 model = glm::mat4(1.0f);
+        for(int i=0; i<streetPositions.size(); i++) {
+            ourShader.use();
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, streetPositions[i]);
+            model = glm::scale(model, glm::vec3(0.008f));
+            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            ourShader.setMat4("model", model);
+            street.Draw(ourShader);
+        }
 
         ourShader.use();
         glm::mat4 model2 = glm::mat4(1.0f);
-        model2 = glm::translate(model2, glm::vec3(-1.0f, 0.0f, 0.0f));
-        model2 = glm::scale(model2, glm::vec3(0.5f));
-        ourShader.setMat4("model", model2);
-        sign.Draw(ourShader);
+        for(int i=0; i<stopSignPositions.size(); i++) {
+            ourShader.use();
+            model2 = glm::mat4(1.0f);
+            model2 = glm::translate(model2, stopSignPositions[i]);
+            model2 = glm::scale(model2, glm::vec3(0.3f));
+            model2 = glm::rotate(model2, glm::radians(30.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+            ourShader.setMat4("model", model2);
+            sign.Draw(ourShader);
+        }
 
         ourShader.use();
         glm::mat4 model3 = glm::mat4(1.0f);
-        model3 = glm::translate(model3, glm::vec3(0.0f, 0.0f, 0.0f));
-        model3 = glm::scale(model3, glm::vec3(0.008f));
-        model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        // model3 = glm::rotate(model3, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        ourShader.setMat4("model", model3);
-        sign2.Draw(ourShader);
+        for(int i=0; i<speedSignPositions.size(); i++) {
+            ourShader.use();
+            model3 = glm::translate(model3, speedSignPositions[i]);
+            model3 = glm::scale(model3, glm::vec3(0.008f));
+            model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            model3 = glm::rotate(model3, glm::radians(75.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+            ourShader.setMat4("model", model3);
+            sign2.Draw(ourShader);
+        }
+
 
         // draw skybox
         glDepthMask(GL_FALSE);
@@ -417,7 +451,7 @@ int main() {
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-
+/*
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         programState->camera.ProcessKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -426,6 +460,7 @@ void processInput(GLFWwindow *window) {
         programState->camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         programState->camera.ProcessKeyboard(RIGHT, deltaTime);
+        */
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -584,7 +619,7 @@ void setShader(Shader ourShader, PointLight pointLight, SpotLight spotLight) {
 
     ourShader.setInt("pointLightOn", pointLightOn);
 
-    pointLight.position = glm::vec3(0.0f, -2.0f, 0.0f);
+    pointLight.position = glm::vec3(15.0f, 4.0f, 9.0f);
 
     ourShader.setVec3("pointLight1.position", pointLight.position);
     ourShader.setVec3("pointLight1.ambient", pointLight.ambient);
