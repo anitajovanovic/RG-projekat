@@ -250,6 +250,9 @@ int main() {
     Model sign2("resources/objects/speed-limit-sign/10566_Speed Limit Sign (70 MPH)_v2-L3.obj");
     sign2.SetShaderTextureNamePrefix("material.");
 
+    Model car("resources/objects/abandoned-snow-carraw/source/AbandonedSnowCar/AbandonedSnowCar.fbx");
+    car.SetShaderTextureNamePrefix("material.");
+
     vector<glm::vec3> streetPositions {
             glm::vec3(16.0f,5.0f,10.0f),
             glm::vec3(16.0f,6.75f,8.25f),
@@ -263,13 +266,6 @@ int main() {
 
     };
 
-    vector<glm::vec3> stopSignPositions {
-            glm::vec3(13.95f,7.0f,12.0f)
-    };
-
-    vector<glm::vec3> speedSignPositions {
-            glm::vec3(17.85f,7.5f,12.0f)
-    };
 
     // Skybox vertices
     //____________________________________________________________________________________________
@@ -385,29 +381,33 @@ int main() {
 
         ourShader.use();
         glm::mat4 model2 = glm::mat4(1.0f);
-        for(int i=0; i<stopSignPositions.size(); i++) {
-            ourShader.use();
-            model2 = glm::mat4(1.0f);
-            model2 = glm::translate(model2, stopSignPositions[i]);
-            model2 = glm::scale(model2, glm::vec3(0.3f));
-            model2 = glm::rotate(model2, glm::radians(30.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-            ourShader.setMat4("model", model2);
-            sign.Draw(ourShader);
-        }
+        model2 = glm::translate(model2, glm::vec3(18.15f,8.6f,10.0f));
+        model2 = glm::scale(model2, glm::vec3(0.3f));
+        model2 = glm::rotate(model2, glm::radians(75.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        model2 = glm::rotate(model2, glm::radians(30.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        ourShader.setMat4("model", model2);
+        sign.Draw(ourShader);
+
 
         ourShader.use();
         glm::mat4 model3 = glm::mat4(1.0f);
-        for(int i=0; i<speedSignPositions.size(); i++) {
-            ourShader.use();
-            model3 = glm::translate(model3, speedSignPositions[i]);
-            model3 = glm::scale(model3, glm::vec3(0.008f));
-            model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-            model3 = glm::rotate(model3, glm::radians(75.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-            ourShader.setMat4("model", model3);
-            sign2.Draw(ourShader);
-        }
+        model3 = glm::translate(model3, glm::vec3(14.15f,7.0f,12.0f));
+        model3 = glm::scale(model3, glm::vec3(0.008f));
+        model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model3 = glm::rotate(model3, glm::radians(75.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+        ourShader.setMat4("model", model3);
+        sign2.Draw(ourShader);
 
+        ourShader.use();
+        glm::mat4 model4 = glm::mat4(1.0f);
+        model4 = glm::translate(model4, glm::vec3(16.3f,13.0f,7.0f));
+        model4 = glm::rotate(model4, glm::radians(20.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        model4 = glm::rotate(model4, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model4 = glm::rotate(model4, glm::radians(20.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+        model4 = glm::scale(model4, glm::vec3(0.6f));
+        ourShader.setMat4("model", model4);
+        car.Draw(ourShader);
 
         // draw skybox
         glDepthMask(GL_FALSE);
@@ -426,8 +426,6 @@ int main() {
 
         if (programState->ImGuiEnabled)
             DrawImGui(programState);
-
-
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -619,7 +617,7 @@ void setShader(Shader ourShader, PointLight pointLight, SpotLight spotLight) {
 
     ourShader.setInt("pointLightOn", pointLightOn);
 
-    pointLight.position = glm::vec3(15.0f, 4.0f, 9.0f);
+    pointLight.position = glm::vec3(14.0f, 14.0f, 9.0f);
 
     ourShader.setVec3("pointLight1.position", pointLight.position);
     ourShader.setVec3("pointLight1.ambient", pointLight.ambient);
