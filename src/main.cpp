@@ -195,6 +195,7 @@ int main() {
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
     //light
 
@@ -298,12 +299,12 @@ int main() {
     // skybox textures
     programState->faces =
             {
-                    FileSystem::getPath("resources/textures/skybox/right.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/left.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/top.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/back.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/front.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/right1.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/left1.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/top1.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/bottom1.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/back1.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/front1.jpg"),
             };
 
     programState->cubemapTexture = loadCubemap(programState->faces);
