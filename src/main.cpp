@@ -200,14 +200,25 @@ int main() {
     //light
 
     PointLight& pointLight = programState->pointLight;
-    pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
-    pointLight.ambient = glm::vec3(0.1, 0.1, 0.1);
-    pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
+    // pointLight.position = glm::vec3(4.0f, 4.0, 2.0);
+    pointLight.ambient = glm::vec3(0.3, 0.3, 0.3);
+    pointLight.diffuse = glm::vec3(0.7, 0.7, 0.7);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
 
-    pointLight.constant = 1.0f;
-    pointLight.linear = 0.09f;
+    pointLight.constant = 0.05f;
+    pointLight.linear = 0.06f;
     pointLight.quadratic = 0.032f;
+
+    /*
+    PointLight& pointLight = programState->pointLight;
+    pointLight.ambient = glm::vec3(0.5, 0.5, 0.5);
+    pointLight.diffuse = glm::vec3(0.9, 0.9, 0.9);
+    pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
+
+    pointLight.constant = 0.008f;
+    pointLight.linear = 0.04f;
+    pointLight.quadratic = 0.04f;
+    */
 
     SpotLight& spotLight = programState->spotLight;
     spotLight.position = programState->camera.Position;
@@ -233,10 +244,10 @@ int main() {
     Model street("resources/objects/road/10563_RoadSectionStraight_v1-L3.obj");
     street.SetShaderTextureNamePrefix("material.");
 
-    Model sign("resources/objects/zgzccjcx2b-StopSign_By_TyroSmith/StopSign/StopSign.obj");
+    Model sign("resources/objects/stop-sign/StopSign.obj");
     sign.SetShaderTextureNamePrefix("material.");
 
-    Model sign2("resources/objects/Speed_Limit_Sign_70MPH_L3.123c8514ab6e-ed75-4bb4-8a6d-fa26b2d254af/10566_Speed Limit Sign (70 MPH)_v2-L3.obj");
+    Model sign2("resources/objects/speed-limit-sign/10566_Speed Limit Sign (70 MPH)_v2-L3.obj");
     sign2.SetShaderTextureNamePrefix("material.");
 
     // Skybox vertices
@@ -299,12 +310,12 @@ int main() {
     // skybox textures
     programState->faces =
             {
-                    FileSystem::getPath("resources/textures/skybox/right1.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/left1.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/top1.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/bottom1.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/back1.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/front1.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/right.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/left.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/top.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/back.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/front.jpg"),
             };
 
     programState->cubemapTexture = loadCubemap(programState->faces);
@@ -573,7 +584,7 @@ void setShader(Shader ourShader, PointLight pointLight, SpotLight spotLight) {
 
     ourShader.setInt("pointLightOn", pointLightOn);
 
-    pointLight.position = glm::vec3(0.0f, 0.0f, 0.0f);
+    pointLight.position = glm::vec3(0.0f, -2.0f, 0.0f);
 
     ourShader.setVec3("pointLight1.position", pointLight.position);
     ourShader.setVec3("pointLight1.ambient", pointLight.ambient);
