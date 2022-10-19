@@ -381,17 +381,17 @@ int main() {
 
         ourShader.use();
         glm::mat4 model2 = glm::mat4(1.0f);
-        model2 = glm::translate(model2, glm::vec3(18.15f,8.6f,10.0f));
+        model2 = glm::translate(model2, glm::vec3(18.75f,7.6f,8.0f));
         model2 = glm::scale(model2, glm::vec3(0.3f));
-        model2 = glm::rotate(model2, glm::radians(75.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-        model2 = glm::rotate(model2, glm::radians(30.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        model2 = glm::rotate(model2, glm::radians(105.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        model2 = glm::rotate(model2, glm::radians(30.0f), glm::vec3(0.0f, 0.0f, -1.0f));
         ourShader.setMat4("model", model2);
         sign.Draw(ourShader);
 
 
         ourShader.use();
         glm::mat4 model3 = glm::mat4(1.0f);
-        model3 = glm::translate(model3, glm::vec3(14.15f,7.0f,12.0f));
+        model3 = glm::translate(model3, glm::vec3(13.2f,5.8f,9.0f));
         model3 = glm::scale(model3, glm::vec3(0.008f));
         model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         model3 = glm::rotate(model3, glm::radians(75.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -401,7 +401,7 @@ int main() {
 
         ourShader.use();
         glm::mat4 model4 = glm::mat4(1.0f);
-        model4 = glm::translate(model4, glm::vec3(16.3f,13.0f,7.0f));
+        model4 = glm::translate(model4, glm::vec3(16.3f,15.0f,1.75f));
         model4 = glm::rotate(model4, glm::radians(20.0f), glm::vec3(0.0f, -1.0f, 0.0f));
         model4 = glm::rotate(model4, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model4 = glm::rotate(model4, glm::radians(20.0f), glm::vec3(0.0f, 0.0f, -1.0f));
@@ -449,7 +449,7 @@ int main() {
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-/*
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         programState->camera.ProcessKeyboard(FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -458,7 +458,7 @@ void processInput(GLFWwindow *window) {
         programState->camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         programState->camera.ProcessKeyboard(RIGHT, deltaTime);
-        */
+
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -617,7 +617,7 @@ void setShader(Shader ourShader, PointLight pointLight, SpotLight spotLight) {
 
     ourShader.setInt("pointLightOn", pointLightOn);
 
-    pointLight.position = glm::vec3(14.0f, 14.0f, 9.0f);
+    pointLight.position = glm::vec3(16.0f, 7.0f, 8.0f);
 
     ourShader.setVec3("pointLight1.position", pointLight.position);
     ourShader.setVec3("pointLight1.ambient", pointLight.ambient);
