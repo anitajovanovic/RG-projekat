@@ -28,8 +28,6 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 
 unsigned int loadCubemap(vector<std::string> faces);
 
-unsigned int loadTexture(const char *path);
-
 struct DirLight {
     glm::vec3 direction;
 
@@ -62,7 +60,7 @@ struct SpotLight {
     glm::vec3 specular;
 };
 
-void setShader(Shader ourShader, PointLight pointLight, SpotLight spotLight);
+void setShader(Shader ourShader, DirLight dirLight, PointLight pointLight, SpotLight spotLight);
 
 
 // settings
@@ -71,6 +69,8 @@ const unsigned int SCR_HEIGHT = 600;
 
 bool spotLightOn = false;
 bool pointLightOn = true;
+bool plKeyPressed = false;
+bool slKeyPressed = false;
 
 // camera
 
@@ -88,6 +88,7 @@ struct ProgramState {
     Camera camera;
     bool CameraMouseMovementUpdateEnabled = true;
 
+    DirLight dirLight;
     PointLight pointLight;
     SpotLight spotLight;
 
@@ -199,40 +200,35 @@ int main() {
 
     //light
 
+    DirLight& dirLight = programState->dirLight;
+    dirLight.direction = glm::vec3(20.0f, -10.0f, 50.0f);
+    dirLight.ambient = glm::vec3(0.02);
+    dirLight.diffuse = glm::vec3(0.3, 0.1, 0.0);
+    dirLight.specular = glm::vec3(0.4, 0.3, 0.2);
+
     PointLight& pointLight = programState->pointLight;
-    // pointLight.position = glm::vec3(4.0f, 4.0, 2.0);
-    pointLight.ambient = glm::vec3(0.3, 0.3, 0.3);
-    pointLight.diffuse = glm::vec3(0.7, 0.7, 0.7);
+    pointLight.ambient = glm::vec3(1.0, 1.0, 1.0);
+    pointLight.diffuse = glm::vec3(0.8, 0.8, 0.8);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
 
-    pointLight.constant = 0.05f;
-    pointLight.linear = 0.06f;
-    pointLight.quadratic = 0.032f;
+    pointLight.constant = 0.23f;
+    pointLight.linear = 0.31f;
+    pointLight.quadratic = 0.36f;
 
-    /*
-    PointLight& pointLight = programState->pointLight;
-    pointLight.ambient = glm::vec3(0.5, 0.5, 0.5);
-    pointLight.diffuse = glm::vec3(0.9, 0.9, 0.9);
-    pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
-
-    pointLight.constant = 0.008f;
-    pointLight.linear = 0.04f;
-    pointLight.quadratic = 0.04f;
-    */
 
     SpotLight& spotLight = programState->spotLight;
     spotLight.position = programState->camera.Position;
     spotLight.direction = programState->camera.Front;
-    spotLight.ambient = glm::vec3 (0.5f);
+    spotLight.ambient = glm::vec3 (0.6f);
     spotLight.diffuse = glm::vec3 (0.9f);
 
-    spotLight.specular = glm::vec3 (1.5f, 1.5f, 1.5f);
-    spotLight.constant = 0.0003f;
-    spotLight.linear = 0.0009f;
-    spotLight.quadratic = 0.0009f;
+    spotLight.specular = glm::vec3 (0.9f, 0.9f, 0.9f);
+    spotLight.constant = 0.001f;
+    spotLight.linear = 0.006f;
+    spotLight.quadratic = 0.004f;
 
-    spotLight.cutOff = glm::cos(glm::radians(5.5f));
-    spotLight.outerCutOff = glm::cos(glm::radians(7.0f));
+    spotLight.cutOff = glm::cos(glm::radians(2.5f));
+    spotLight.outerCutOff = glm::cos(glm::radians(5.0f));
 
     // build and compile shaders
     // -------------------------
@@ -244,13 +240,13 @@ int main() {
     Model street("resources/objects/road/10563_RoadSectionStraight_v1-L3.obj");
     street.SetShaderTextureNamePrefix("material.");
 
-    Model sign("resources/objects/stop-sign/StopSign.obj");
-    sign.SetShaderTextureNamePrefix("material.");
+    Model stopSign("resources/objects/stop-sign/StopSign.obj");
+    stopSign.SetShaderTextureNamePrefix("material.");
 
-    Model sign2("resources/objects/speed-limit-sign/10566_Speed Limit Sign (70 MPH)_v2-L3.obj");
-    sign2.SetShaderTextureNamePrefix("material.");
+    Model speedSign("resources/objects/speed-limit-sign/10566_Speed Limit Sign (70 MPH)_v2-L3.obj");
+    speedSign.SetShaderTextureNamePrefix("material.");
 
-    Model car("resources/objects/abandoned-snow-carraw/source/AbandonedSnowCar/AbandonedSnowCar.fbx");
+    Model car("resources/objects/car/source/AbandonedSnowCar/AbandonedSnowCar.fbx");
     car.SetShaderTextureNamePrefix("material.");
 
     vector<glm::vec3> streetPositions {
@@ -265,7 +261,6 @@ int main() {
             glm::vec3(16.0f,19.0f,-4.0f)
 
     };
-
 
     // Skybox vertices
     //____________________________________________________________________________________________
@@ -314,7 +309,9 @@ int main() {
             1.0f, -1.0f,  1.0f
     };
 
+
     // skybox VAO
+    // --------------------------------------------------------
     unsigned int skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
     glGenBuffers(1, &skyboxVBO);
@@ -325,6 +322,7 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     // skybox textures
+    // ---------------------------------------------------------
     programState->faces =
             {
                     FileSystem::getPath("resources/textures/skybox/right.jpg"),
@@ -359,7 +357,7 @@ int main() {
         glClearColor(programState->clearColor.r, programState->clearColor.g, programState->clearColor.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        setShader(ourShader, pointLight, spotLight);
+        setShader(ourShader, dirLight, pointLight, spotLight);
 
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = programState->camera.GetViewMatrix();
@@ -367,49 +365,49 @@ int main() {
         ourShader.setMat4("view", view);
 
         ourShader.use();
-        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 modelStreet = glm::mat4(1.0f);
         for(int i=0; i<streetPositions.size(); i++) {
             ourShader.use();
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, streetPositions[i]);
-            model = glm::scale(model, glm::vec3(0.008f));
-            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-            model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            ourShader.setMat4("model", model);
+            modelStreet = glm::mat4(1.0f);
+            modelStreet = glm::translate(modelStreet, streetPositions[i]);
+            modelStreet = glm::scale(modelStreet, glm::vec3(0.008f));
+            modelStreet = glm::rotate(modelStreet, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+            modelStreet = glm::rotate(modelStreet, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            ourShader.setMat4("model", modelStreet);
             street.Draw(ourShader);
         }
 
         ourShader.use();
-        glm::mat4 model2 = glm::mat4(1.0f);
-        model2 = glm::translate(model2, glm::vec3(18.75f,7.6f,8.0f));
-        model2 = glm::scale(model2, glm::vec3(0.3f));
-        model2 = glm::rotate(model2, glm::radians(105.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-        model2 = glm::rotate(model2, glm::radians(30.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-        ourShader.setMat4("model", model2);
-        sign.Draw(ourShader);
-
-
-        ourShader.use();
-        glm::mat4 model3 = glm::mat4(1.0f);
-        model3 = glm::translate(model3, glm::vec3(13.2f,5.8f,9.0f));
-        model3 = glm::scale(model3, glm::vec3(0.008f));
-        model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        model3 = glm::rotate(model3, glm::radians(75.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        model3 = glm::rotate(model3, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-        ourShader.setMat4("model", model3);
-        sign2.Draw(ourShader);
+        glm::mat4 modelStopSign = glm::mat4(1.0f);
+        modelStopSign = glm::translate(modelStopSign, glm::vec3(18.75f,7.6f,8.0f));
+        modelStopSign = glm::scale(modelStopSign, glm::vec3(0.3f));
+        modelStopSign = glm::rotate(modelStopSign, glm::radians(105.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        modelStopSign = glm::rotate(modelStopSign, glm::radians(30.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+        ourShader.setMat4("model", modelStopSign);
+        stopSign.Draw(ourShader);
 
         ourShader.use();
-        glm::mat4 model4 = glm::mat4(1.0f);
-        model4 = glm::translate(model4, glm::vec3(16.3f,15.0f,1.75f));
-        model4 = glm::rotate(model4, glm::radians(20.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-        model4 = glm::rotate(model4, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model4 = glm::rotate(model4, glm::radians(20.0f), glm::vec3(0.0f, 0.0f, -1.0f));
-        model4 = glm::scale(model4, glm::vec3(0.6f));
-        ourShader.setMat4("model", model4);
+        glm::mat4 modelSpeedSign = glm::mat4(1.0f);
+        modelSpeedSign = glm::translate(modelSpeedSign, glm::vec3(13.2f,5.8f,9.0f));
+        modelSpeedSign = glm::scale(modelSpeedSign, glm::vec3(0.008f));
+        modelSpeedSign = glm::rotate(modelSpeedSign, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        modelSpeedSign = glm::rotate(modelSpeedSign, glm::radians(75.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelSpeedSign = glm::rotate(modelSpeedSign, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+        ourShader.setMat4("model", modelSpeedSign);
+        speedSign.Draw(ourShader);
+
+        ourShader.use();
+        glm::mat4 modelCar = glm::mat4(1.0f);
+        modelCar = glm::translate(modelCar, glm::vec3(16.3f,15.0f,1.75f));
+        modelCar = glm::rotate(modelCar, glm::radians(20.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+        modelCar = glm::rotate(modelCar, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        modelCar = glm::rotate(modelCar, glm::radians(20.0f), glm::vec3(0.0f, 0.0f, -1.0f));
+        modelCar = glm::scale(modelCar, glm::vec3(0.6f));
+        ourShader.setMat4("model", modelCar);
         car.Draw(ourShader);
 
         // draw skybox
+        // -------------------------------------------------------------------
         glDepthMask(GL_FALSE);
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
@@ -459,6 +457,24 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         programState->camera.ProcessKeyboard(RIGHT, deltaTime);
 
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && !plKeyPressed){
+        pointLightOn = !pointLightOn;
+        plKeyPressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE)
+    {
+        plKeyPressed = false;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !slKeyPressed){
+        spotLightOn = !spotLightOn;
+        slKeyPressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE)
+    {
+        slKeyPressed = false;
+    }
+
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -499,16 +515,12 @@ void DrawImGui(ProgramState *programState) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    /*
-
     {
         static float f = 0.0f;
         ImGui::Begin("Hello window");
         ImGui::Text("Hello text");
         ImGui::SliderFloat("Float slider", &f, 0.0, 1.0);
         ImGui::ColorEdit3("Background color", (float *) &programState->clearColor);
-        ImGui::DragFloat3("Backpack position", (float*)&programState->backpackPosition);
-        ImGui::DragFloat("Backpack scale", &programState->backpackScale, 0.05, 0.1, 4.0);
 
         ImGui::DragFloat("pointLight.constant", &programState->pointLight.constant, 0.05, 0.0, 1.0);
         ImGui::DragFloat("pointLight.linear", &programState->pointLight.linear, 0.05, 0.0, 1.0);
@@ -526,7 +538,7 @@ void DrawImGui(ProgramState *programState) {
         ImGui::End();
     }
 
-    */
+
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -542,43 +554,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
-}
 
-unsigned int loadTexture(char const * path)
-{
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data)
-    {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
 }
 
 unsigned int loadCubemap(vector<std::string> faces)
@@ -611,13 +587,18 @@ unsigned int loadCubemap(vector<std::string> faces)
     return textureID;
 }
 
-void setShader(Shader ourShader, PointLight pointLight, SpotLight spotLight) {
+void setShader(Shader ourShader, DirLight dirLight, PointLight pointLight, SpotLight spotLight) {
 
     ourShader.use();
 
+    ourShader.setVec3("dirLight.direction", dirLight.direction);
+    ourShader.setVec3("dirLight.ambient", dirLight.ambient);
+    ourShader.setVec3("dirLight.diffuse", dirLight.diffuse);
+    ourShader.setVec3("dirLight.specular", dirLight.specular);
+
     ourShader.setInt("pointLightOn", pointLightOn);
 
-    pointLight.position = glm::vec3(16.0f, 7.0f, 8.0f);
+    pointLight.position = glm::vec3(16.0f, 15.0f, 3.5f);
 
     ourShader.setVec3("pointLight1.position", pointLight.position);
     ourShader.setVec3("pointLight1.ambient", pointLight.ambient);
@@ -626,6 +607,30 @@ void setShader(Shader ourShader, PointLight pointLight, SpotLight spotLight) {
     ourShader.setFloat("pointLight1.constant", pointLight.constant);
     ourShader.setFloat("pointLight1.linear", pointLight.linear);
     ourShader.setFloat("pointLight1.quadratic", pointLight.quadratic);
+    ourShader.setVec3("viewPosition", programState->camera.Position);
+    ourShader.setFloat("material.shininess", 32.0f);
+
+    pointLight.position = glm::vec3(18.0f, 7.0f, 10.0f);
+
+    ourShader.setVec3("pointLight2.position", pointLight.position);
+    ourShader.setVec3("pointLight2.ambient", pointLight.ambient);
+    ourShader.setVec3("pointLight2.diffuse", pointLight.diffuse);
+    ourShader.setVec3("pointLight2.specular", pointLight.specular);
+    ourShader.setFloat("pointLight2.constant", pointLight.constant);
+    ourShader.setFloat("pointLight2.linear", pointLight.linear);
+    ourShader.setFloat("pointLight2.quadratic", pointLight.quadratic);
+    ourShader.setVec3("viewPosition", programState->camera.Position);
+    ourShader.setFloat("material.shininess", 32.0f);
+
+    pointLight.position = glm::vec3(13.0f, 3.5f, 11.0f);
+
+    ourShader.setVec3("pointLight3.position", pointLight.position);
+    ourShader.setVec3("pointLight3.ambient", pointLight.ambient);
+    ourShader.setVec3("pointLight3.diffuse", pointLight.diffuse);
+    ourShader.setVec3("pointLight3.specular", pointLight.specular);
+    ourShader.setFloat("pointLight3.constant", pointLight.constant);
+    ourShader.setFloat("pointLight3.linear", pointLight.linear);
+    ourShader.setFloat("pointLight3.quadratic", pointLight.quadratic);
     ourShader.setVec3("viewPosition", programState->camera.Position);
     ourShader.setFloat("material.shininess", 32.0f);
 
