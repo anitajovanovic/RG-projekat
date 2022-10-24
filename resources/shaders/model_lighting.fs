@@ -57,6 +57,7 @@ uniform PointLight pointLight3;
 uniform Material material;
 
 uniform SpotLight spotLight;
+
 uniform bool spotLightOn;
 uniform bool pointLightOn;
 

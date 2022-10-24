@@ -199,7 +199,7 @@ int main() {
     glEnable(GL_MULTISAMPLE);
 
     //light
-
+    // ---------------------------------------------------
     DirLight& dirLight = programState->dirLight;
     dirLight.direction = glm::vec3(20.0f, -10.0f, 50.0f);
     dirLight.ambient = glm::vec3(0.02);
@@ -329,8 +329,8 @@ int main() {
                     FileSystem::getPath("resources/textures/skybox/left.jpg"),
                     FileSystem::getPath("resources/textures/skybox/top.jpg"),
                     FileSystem::getPath("resources/textures/skybox/bottom.jpg"),
-                    FileSystem::getPath("resources/textures/skybox/back.jpg"),
                     FileSystem::getPath("resources/textures/skybox/front.jpg"),
+                    FileSystem::getPath("resources/textures/skybox/back.jpg"),
             };
 
     programState->cubemapTexture = loadCubemap(programState->faces);
@@ -445,8 +445,11 @@ int main() {
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
+
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         programState->camera.ProcessKeyboard(FORWARD, deltaTime);
