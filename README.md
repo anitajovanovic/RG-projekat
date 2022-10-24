@@ -4,7 +4,9 @@
 
 # Komande:
   `W` `A` `S` `D` - kretanje napred, nazad, levo, desno
+
   `P` - uključivanje/isključivanje osvetljenja
+
   `T` - uključivanje/isključivanje spotlight-a
 
 
