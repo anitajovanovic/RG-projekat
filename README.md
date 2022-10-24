@@ -10,7 +10,8 @@
   `T` - uključivanje/isključivanje spotlight-a
 
 
-# Implementirana oblast:  grupa A - Cubemaps (Skybox)
+# Implementirana oblast: 
+ grupa A - Cubemaps (Skybox)
 
 # Snimak projekta: 
 
