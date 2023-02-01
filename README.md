@@ -17,3 +17,9 @@
 
 
 # Fotografije: 
+![img](pictures/1.jpeg)
+![img](pictures/2.jpeg)
+![img](pictures/3.jpeg)
+![img](pictures/4.jpeg)
+![img](pictures/5.jpeg)
+![img](pictures/6.jpeg)
