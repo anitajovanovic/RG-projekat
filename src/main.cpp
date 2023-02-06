@@ -179,6 +179,18 @@ int main() {
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
    // stbi_set_flip_vertically_on_load(true);
 
+
+   // dodatak
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   // dodatak
+
+    // dodatak
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    // dodatak
+
     programState = new ProgramState;
     programState->LoadFromFile("resources/program_state.txt");
     if (programState->ImGuiEnabled) {
@@ -239,6 +251,7 @@ int main() {
 
     // load models
     // -----------
+
     Model street("resources/objects/road/10563_RoadSectionStraight_v1-L3.obj");
     street.SetShaderTextureNamePrefix("material.");
 
@@ -326,6 +339,7 @@ int main() {
     };
 
     // parking VAO
+    // ----------------------------------------------------------
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -410,6 +424,7 @@ int main() {
         glad_glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+        glDisable(GL_CULL_FACE);
 
         ourShader.use();
         glm::mat4 modelStreet = glm::mat4(1.0f);
