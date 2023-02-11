@@ -177,13 +177,11 @@ int main() {
     }
 
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
-   // stbi_set_flip_vertically_on_load(true);
+    // stbi_set_flip_vertically_on_load(true);
 
 
-   // dodatak
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   // dodatak
 
     // dodatak
     glEnable(GL_CULL_FACE);
@@ -248,6 +246,7 @@ int main() {
     // -------------------------
     Shader ourShader("resources/shaders/model_lighting.vs", "resources/shaders/model_lighting.fs");
     Shader skyboxShader("resources/shaders/skybox.vs", "resources/shaders/skybox.fs");
+    Shader blendingShader("resources/shaders/blending.vs", "resources/shaders/blending.fs");
 
     // load models
     // -----------
@@ -290,6 +289,18 @@ int main() {
             0, 1, 3, // first triangle
             1, 2, 3  // second triangle
     };
+
+    float transparentVertices[] = {
+            // positions         // texture Coords
+            0.0f,  0.5f,  0.0f,  0.0f,  1.0f,
+            0.0f, -0.5f,  0.0f,  0.0f,  0.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  0.0f,
+
+            0.0f,  0.5f,  0.0f,  0.0f,  1.0f,
+            1.0f, -0.5f,  0.0f,  1.0f,  0.0f,
+            1.0f,  0.5f,  0.0f,  1.0f,  1.0f
+    };
+
 
     // Skybox vertices
     //____________________________________________________________________________________________
@@ -357,6 +368,19 @@ int main() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    // transparent VAO
+    unsigned int transparentVAO, transparentVBO;
+    glGenVertexArrays(1, &transparentVAO);
+    glGenBuffers(1, &transparentVBO);
+    glBindVertexArray(transparentVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, transparentVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), transparentVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
     // skybox VAO
     // --------------------------------------------------------
     unsigned int skyboxVAO, skyboxVBO;
@@ -369,6 +393,8 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     unsigned int parkingTexture = loadTexture(FileSystem::getPath("resources/textures/parking.png").c_str());
+    unsigned int transparentTexture = loadTexture(FileSystem::getPath("resources/textures/grass.png").c_str());
+
 
     // skybox textures
     // ---------------------------------------------------------
@@ -386,6 +412,15 @@ int main() {
 
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
+
+    blendingShader.use();
+    blendingShader.setInt("texture1", 0);
+
+    vector<glm::vec3> vegetation
+            {
+                    glm::vec3(18.5f,7.55f,8.0f), // stop sign
+                    glm::vec3(13.0f, 6.4f, 9.3f) // speed sign
+            };
 
     // render loop
     // -----------
@@ -406,12 +441,15 @@ int main() {
         glClearColor(programState->clearColor.r, programState->clearColor.g, programState->clearColor.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
         setShader(ourShader, dirLight, pointLight, spotLight);
 
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = programState->camera.GetViewMatrix();
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
+
+        glDisable(GL_CULL_FACE);
 
         ourShader.use();
         glBindTexture(GL_TEXTURE_2D, parkingTexture);
@@ -424,7 +462,7 @@ int main() {
         glad_glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        glDisable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
 
         ourShader.use();
         glm::mat4 modelStreet = glm::mat4(1.0f);
@@ -468,6 +506,29 @@ int main() {
         ourShader.setMat4("model", modelCar);
         car.Draw(ourShader);
 
+        glDisable(GL_CULL_FACE);
+
+
+        blendingShader.use();
+        glBindVertexArray(transparentVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, transparentTexture);
+
+        projection = glm::perspective(glm::radians(programState->camera.Zoom),
+                                      (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+        view = programState->camera.GetViewMatrix();
+
+        blendingShader.setMat4("projection", projection);
+        blendingShader.setMat4("view", view);
+
+        for (unsigned int i = 0; i < vegetation.size(); i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, vegetation[i]);
+            model = glm::scale(model, glm::vec3(0.65f));
+            blendingShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
+
         // draw skybox
         // -------------------------------------------------------------------
         glDepthMask(GL_FALSE);
@@ -483,6 +544,9 @@ int main() {
         glBindVertexArray(0);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
+
+
+
 
         if (programState->ImGuiEnabled)
             DrawImGui(programState);
