@@ -14,7 +14,7 @@
  grupa A - Cubemaps (Skybox)
 
 # Snimak projekta 🎥 : 
-https://youtu.be/GVj8H6M-4Tg
+https://www.youtube.com/watch?v=W8oKSxBwzpw
 
 
 # Fotografije 📷 : 
